@@ -1,0 +1,444 @@
+---
+title: "Supplementory material for Consumers' preferences for commons-based and open-source tomatoes: A discrete choice experiment Code for Analysis"
+author: " Lea Kliem and Julian Sagebiel"
+date: "07/06/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+
+This script analyses the data collected from the main survey of the paper "Consumers' preferences for commons-based and open-source tomatoes: A discrete choice experiment". It includes the second pilot, but not the first pilot. The first pilot cannot be used because attributes etc changed.
+
+The script includes all relevant steps from preparation of raw data to final models. Readers can use the data and code.
+
+The preregistration can be found here https://aspredicted.org/blind.php?x=K3X_S4Z
+
+
+
+
+# Prepare data
+
+
+First, load packages and user written functions.
+
+```{r setup, include=FALSE, warning=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+rm(list = ls())
+
+library("flextable")
+library("dplyr")          
+library("evd")           
+library("boot")
+library("apollo")
+library("sjlabelled")
+library("readxl")
+library("httr")
+library("ggplot2")
+library("tidyr")
+library("magrittr")
+library("psych")
+library("kableExtra")
+library("tidylog")
+library("texreg")
+
+
+
+source("helpfunctions.R")
+
+```
+
+```{r}
+rightseeds_live_pages <- read_excel("data/mainstudy/rightseeds_live_pages.xlsx")
+```
+
+
+
+no_text
+
+text1
+
+text2
+
+
+```{r prep}
+
+dce_data <- bind_rows(read_excel("data/mainstudy/rightseeds_live_dce_gg.xlsx"), read_excel("data/mainstudy/rightseeds_live_dce_os.xlsx") ,.id = "gg") %>%  ## gg: 1= gg 2 = oc
+  left_join(read_excel("data/mainstudy/rightseeds_live_covariates.xlsx"), by ="RID") #%>% 
+  #select(1:18, info_text)
+
+
+dce_dict<- read_excel("data/mainstudy/rightseeds_live_dce_os.xlsx" , sheet = "dictionary")
+cov_dict<- read_excel("data/mainstudy/rightseeds_live_covariates.xlsx" , sheet = "dictionary")
+
+
+  
+
+  # Get data from SurveyEngine - import as xls
+  
+  database2 <-  dce_data%>% 
+   #filter(!is.na(pref1)) %>% 
+    filter(!is.na(q28), q8_16==4|q8_16 %in% c(4,6) ) %>%   ## q28 ==NA, q8_16==4 or q8_16 == weiss nicht, respondents who took too little time
+left_join(rightseeds_live_pages, by="RID") %>% 
+  mutate(duration_lastp = PAGE_SUBMIT_30-PAGE_DISPLAY_30 ,
+         duration_lastp_imputed= if_else(is.na(duration_lastp), mean(duration_lastp, na.rm=TRUE),duration_lastp ),
+         DURATION_ALL= PAGE_DISPLAY_30+duration_lastp_imputed,
+         threshold=1/3*mean(DURATION_ALL)) %>% 
+  filter(DURATION_ALL>threshold)  %>% 
+     mutate(Female=case_when(q20==2 ~ 1,   TRUE ~0) , Female_s =as.numeric(scale(Female, scale=FALSE)),
+            Age_s = as.numeric(scale(q21, scale=FALSE)),
+            HigherEdu=case_when(q26_new %in% c(1,2,3,8) ~ 0,   TRUE ~1) , HigherEdu_s =as.numeric(scale(HigherEdu, scale=FALSE)), # higher education as Meisterausbildung und höher
+            Income=case_when(q28 ==7 ~ mean(q28,na.rm=TRUE),   TRUE ~q28) , Income_s =as.numeric(scale(Income, scale=FALSE)),
+       across(matches("._x[4]$ " ) , ~ .x - 1 ) ,
+                        oc = as.numeric(gg)-1 ,  # 0= gemeingut 1 =open source
+                        winter =as.numeric(jahreszeit)-1 ,  # 0=sommer 1 = winter
+           across(matches("._x1$") ,  ~ recode(  .x ,`1` = 0.99,`2` = 1.49  , `3` = 1.99 , `4` = 2.49 , `5` = 2.99 , `6` = 3.49 , `7` = 3.99 , `8` = 4.99 , .default =99999)) ,
+           a1_EUBIO = a1_x2==2, a1_BIOVER = a1_x2==3 , a2_EUBIO = a2_x2==2, a2_BIOVER = a2_x2==3 ,
+           a1_REG = a1_x3==1, a1_DE = a1_x3==2 , a1_ESP = a1_x3==3 , a1_MAR = a1_x3==4 ,a2_REG = a2_x3==1,  a2_DE = a2_x3==2 ,  a2_ESP = a2_x3==3 , a2_MAR = a2_x3==4
+    )   %>% 
+    as.data.frame()
+ table(database2$gg) 
+ 
+ length(unique(database2$RID))
+ 
+ #write.csv(as.character(unique(database2$RID)), "selectedrespondents.csv" , row.names = FALSE, col.names = "RID")
+ 
+```
+
+```{r , eval=FALSE}
+#Distribution of Blocks
+database2 %>% distinct(RID, .keep_all = TRUE) %>%  select(matches("block")) %>% pivot_longer(1:6, "split","dd") %>% filter(!is.na(value))%>% group_by(split, value) %>%  summarise(n=n()) %>% pivot_wider(names_from = split, values_from = n)
+
+
+ table(database2$gg) 
+```
+
+
+```{r desc, eval=FALSE}
+
+table(database2$DESIGN_ROW)
+  
+  ## For all respondents
+  table(database2$a1_x1)
+  table(database2$a1_x2)
+  table(database2$a1_x3)
+  table(database2$a1_x4)
+
+  
+  #Only for the first respondents
+  table(database2$a1_x1[unique(database2$DESIGN_ROW)], useNA = "always")
+  table(database2$a1_x2[unique(database2$DESIGN_ROW)], useNA = "always")
+  table(database2$a1_x3[unique(database2$DESIGN_ROW)], useNA = "always")
+  table(database2$a1_x4[unique(database2$DESIGN_ROW)], useNA = "always")
+
+  
+
+  ## Over all observations
+  cor(database2[, 6:15])
+  
+  ## Only design
+  cor(database2[(unique(database2$DESIGN_ROW)), 6:15])
+  
+  
+  
+  table(database2$pref1)
+  
+  #as probabilities
+  
+  table(database2$pref1)/length(database2$pref1)
+  
+  
+  barplot(prop.table(table(database2$pref1)), ylim = c(0,1))
+  
+  
+  aggregate(as.numeric(pref1)==1 ~ a1_x1 , data=database2 , mean)
+  aggregate(as.numeric(pref1)==2 ~ a2_x1 , data=database2 , mean)
+
+  plot(aggregate(as.numeric(pref1)==1 ~ a1_x1 , data=database2 , mean), type="l")
+  plot(aggregate(as.numeric(pref1)==2 ~ a2_x1 , data=database2 , mean), type="l")
+  
+  
+  plot(aggregate(as.numeric(pref1)==1 ~ a1_x2 , data=database2 , mean), type="o")
+  plot(aggregate(as.numeric(pref1)==2 ~ a2_x2 , data=database2 , mean), type="o")
+  
+  plot(aggregate(as.numeric(pref1)==1 ~ a1_x3 , data=database2 , mean), type="o")
+  plot(aggregate(as.numeric(pref1)==2 ~ a2_x3 , data=database2 , mean), type="o")
+  
+  plot(aggregate(as.numeric(pref1)==1 ~ a1_x4 , data=database2 , mean), type="o")
+  plot(aggregate(as.numeric(pref1)==2 ~ a2_x4 , data=database2 , mean), type="o")
+  
+
+  
+
+
+```
+
+
+```{r individualswitching, eval =FALSE}
+ind_switch <- database2 %>% 
+  group_by(RID, pref1) %>% 
+  summarise(n = n()) %>% 
+  ungroup %>% 
+  group_by(n, pref1) %>% 
+  summarise(freq=n()) %>% 
+  arrange(pref1) %>% 
+  spread(pref1,freq,fill = 0) %>% 
+  rename(nchosen=n, Alt1 =2 , Alt2 = 3 , Optout = 4)
+
+kable(ind_switch) %>%  kable_classic_2(full_width = T)
+```
+
+
+
+
+#  Logit models
+
+```{r estimate logitmodels, eval=FALSE}
+
+source("scripts/clogitmodels.R")
+source("scripts/mixlogitmodels.R")
+source("scripts/mixedlogit_scriptinteractions.R")
+
+delfiles <- dir(path="modeloutput/",  pattern=".csv" ,full.names = T)
+
+file.remove(delfiles)
+
+```
+
+```{r readinsavedModel, eval=T}
+
+
+delfiles <- dir(path="modeloutput/",  pattern="OLD" ,full.names = T)
+
+file.remove(delfiles)
+
+
+  
+
+
+
+modelpath <-list.files(path = "modeloutput/",pattern = "rds$" , full.names = TRUE)
+models_tex <- list()
+models <- list()
+
+
+for (name in modelpath) {
+
+t <- readRDS(name)
+#twtp <- wtp("b_cost",attr = names(t$estimate) , modelname=t) # only relevant if models are not estimated in WTP space
+
+models[[t$apollo_control$modelName]] <-t
+models_tex[[t$apollo_control$modelName]] <-quicktexregapollo(t)
+
+
+}
+
+rm(t,twtp, name, modelpath)
+  
+ 
+
+```
+
+```{r individual wtp}
+library(purrr)
+library(cowplot)
+
+# Read in individual WTP estimates 
+individualWTP_notext <- readRDS("modeloutput/Individual_wtp/individualWTP_notext.rds")
+individualWTP_ind <- readRDS("modeloutput/Individual_wtp/individualWTP_ind.rds")
+individualWTP_env <- readRDS("modeloutput/Individual_wtp/individualWTP_env.rds")
+
+# Define a function that takes a variable name as input and returns a ggplot object
+plot_wtp <- function(var_name) {
+  ggplot(data.frame(x = individualWTP_env[[var_name]]$post.mean), aes(x = x, col="Env")) +
+    geom_density() +
+    geom_density(data = data.frame(x = individualWTP_ind[[var_name]]$post.mean), aes(x = x, col="Ind")) +
+    geom_density(data = data.frame(x = individualWTP_notext[[var_name]]$post.mean), aes(x = x, col="Notext")) +
+    ggtitle(var_name) +
+    xlab("WTP") +
+    ylab("Density") +
+    labs(col="Treatment") +
+    theme(legend.position = c(0.15, 0.85))
+}
+
+# apply the function to each variable in individualWTP data frames
+plot_list <- map(names(individualWTP_env), plot_wtp)
+
+# plot, but use ggarrange to have one common legend
+plot_grid(plotlist = plot_list, nrow = 2, ncol = 4)
+ggsave("Figure_revision/individualWTP.png", width = 14, height = 10, dpi="print")
+```
+
+```{r season, eval=T}
+library(tibble)
+library(reshape2)
+
+mxl_season_compare <- as.data.frame(models$mixlog_season_winter$estimate)
+mxl_season_compare[2] <- as.data.frame(models$mixlog_season_summer$estimate)
+
+alpha = 0.1 # set confidence level 
+
+mxl_season_compare$margin_of_error_w <- qnorm(1-alpha/2)*models$mixlog_season_winter$robse
+mxl_season_compare$margin_of_error_s <- qnorm(1-alpha/2)*models$mixlog_season_summer$robse
+
+mxl_season_compare <- rownames_to_column(mxl_season_compare, "Coefficent")
+
+colnames(mxl_season_compare) <- c("Coefficent", "Estimate_winter", "Estimate_summer", "Margin_of_error_winter",
+                                "Margin_of_error_summer")
+
+
+mxl_melt_season <- melt(mxl_season_compare[1:3], id = "Coefficent")
+mxl_melt_season$ME <- mxl_season_compare$Margin_of_error_winter
+mxl_melt_season$ME[22:42] <- mxl_season_compare$Margin_of_error_summer
+
+
+ggplot(data=mxl_melt_season, aes(x=Coefficent, y=abs(value), fill=variable)) +
+  geom_bar(stat="identity",  position='dodge', width = 0.9) +
+  geom_errorbar(aes(x=Coefficent, ymin=abs(value)-ME, ymax=abs(value)+ME), width=0.3, position=position_dodge(0.8)) +
+  ylab("Absolute Value") +
+  scale_x_discrete(guide = guide_axis(angle = 45)) +
+  scale_fill_brewer(palette = 3, labels = c("Winter", "Summer"), name="Season") +
+  theme(legend.position = c(0.9, 0.85))
+
+ggsave("Figure_revision/season.png", dpi = "print",  width = 10.5, height = 7.5)
+
+```
+
+
+```{r tomato_type, eval=T}
+
+
+mxl_tomato_compare <- as.data.frame(models$mixlog_small_tomato$estimate)
+mxl_tomato_compare[2] <- as.data.frame(models$mixlog_big_tomato$estimate)
+
+alpha = 0.1 # set confidence level 
+
+mxl_tomato_compare$margin_of_error_w <- qnorm(1-alpha/2)*models$mixlog_small_tomato$robse
+mxl_tomato_compare$margin_of_error_s <- qnorm(1-alpha/2)*models$mixlog_big_tomato$robse
+
+mxl_tomato_compare <- rownames_to_column(mxl_tomato_compare, "Coefficent")
+
+colnames(mxl_tomato_compare) <- c("Coefficent", "Estimate_small", "Estimate_big", "Margin_of_error_small",
+                                "Margin_of_error_big")
+
+
+mxl_melt_tomato <- melt(mxl_tomato_compare[1:3], id = "Coefficent")
+mxl_melt_tomato$ME <- mxl_tomato_compare$Margin_of_error_small
+mxl_melt_tomato$ME[23:44] <- mxl_tomato_compare$Margin_of_error_big
+
+
+ggplot(data=mxl_melt_tomato, aes(x=Coefficent, y=abs(value), fill=variable)) +
+  geom_bar(stat="identity",  position='dodge', width = 0.9) +
+  geom_errorbar(aes(x=Coefficent, ymin=abs(value)-ME, ymax=abs(value)+ME), width=0.3, position=position_dodge(0.8)) +
+  ylab("Absolute Value") +
+  scale_x_discrete(guide = guide_axis(angle = 45)) +
+  scale_fill_brewer(palette = 3, labels = c("Small", "Big"), name="Tomato") +
+  theme(legend.position = c(0.9, 0.85))
+
+ggsave("Figure_revision/tomato.png", dpi = "print",  width = 10.5, height = 7.5)
+
+
+```
+
+
+```{r clogittables, results='asis'}
+
+clmodelsWTP_tex <- models_tex[c("clog_allsamples",  "clog_split_notext" , "clog_split_env"  ,  "clog_split_ind") ]
+
+htmlreg(l = clmodelsWTP_tex , file = "tables/clogit.doc" ,
+        custom.model.names = c("Full Sample", "No Text", "Environment" , "Industry") ,  caption = "Results from Infotext Splits" , single.row = T  , 
+        custom.note = "***p < 0.001; **p < 0.01; *p < 0.05 Standard Errors in Brackets" , center = TRUE, doctype = FALSE )
+
+screenreg(l = clmodelsWTP_tex ,
+          caption = "Results from Infotext Splits" , single.row = T  , 
+        custom.note = "***p < 0.001; **p < 0.01; *p < 0.05 Standard Errors in Brackets" , center = TRUE, doctype = FALSE )
+```
+
+
+
+```{r resultsmixedlogit, results='asis'}
+
+mixmodelsWTP_tex <- models_tex[c("mixlog_allsamples",  "mixlog_split_notext" , "mixlog_split_env"  ,  "mixlog_split_ind") ]
+
+htmlreg(l = mixmodelsWTP_tex , file = "tables/mixlogit.doc" ,
+        custom.model.names = c("Full Sample", "No Text", "Environment" , "Industry") ,  caption = "Results from Infotext Splits with mixed logit models" , single.row = T  , 
+        
+        custom.note = "***p < 0.001; **p < 0.01; *p < 0.05 Standard Errors in Brackets" , center = TRUE, doctype = FALSE )
+
+screenreg(l = mixmodelsWTP_tex ,
+          caption = "Results from Infotext Splits mixedlogit" , single.row = T  , 
+        custom.note = "***p < 0.001; **p < 0.01; *p < 0.05 Standard Errors in Brackets" , center = TRUE, doctype = FALSE )
+```
+
+```{r resultsmixedsplitint, results='asis'}
+
+mixlogit_scriptint_tex <- models_tex[["mixlog_scriptint"]]
+
+splitit <-function (select, listobj) {
+  
+  t<- listobj
+  
+cells <-grep(select,t@coef.names)  
+  
+t@coef.names <- t@coef.names[cells]
+t@coef <- t@coef[cells]
+t@se <- t@se[cells]
+t@pvalues <- t@pvalues[cells]
+return(t)  
+
+}
+
+
+
+intmodel_split <- purrr::map(c("mean","sd", "Info2","Info3"), splitit,mixlogit_scriptint_tex)
+
+
+htmlreg(l = intmodel_split , file = "tables/mixlogitintsplit.doc" ,
+          caption = "Results from mixed logit model with interactions of information treatments" , single.row = T  , 
+        
+        custom.note = "***p < 0.001; **p < 0.01; *p < 0.05 Standard Errors in Brackets" , center = TRUE, doctype = FALSE )
+
+screenreg(l = intmodel_split ,
+          caption = "Results from mixed logit model with interactions of information treatments" , single.row = T  , 
+        custom.note = "***p < 0.001; **p < 0.01; *p < 0.05 Standard Errors in Brackets" , center = TRUE, doctype = FALSE )
+```
+
+
+```{r ztest}
+
+
+
+z.envXind <- apollo_ztest(models[["mixlog_split_env"]],models[["mixlog_split_ind"]])
+
+z.envXnotext <- apollo_ztest(models[["mixlog_split_env"]],models[["mixlog_split_notext"]])
+
+
+z.notextXind <-apollo_ztest(models[["mixlog_split_notext"]],models[["mixlog_split_ind"]])
+
+
+# apollo_ztest(models[["clog_split_env"]],models[["clog_split_ind"]])
+# 
+# apollo_ztest(models[["clog_split_env"]],models[["clog_split_notext"]])
+# 
+# 
+# apollo_ztest(models[["clog_split_notext"]],models[["clog_split_ind"]])
+
+
+ztest.pvals <- z.envXind %>% 
+  tibble::rownames_to_column() %>% 
+  bind_cols(z.envXnotext,z.notextXind ) %>% 
+  select(Attribute = rowname,EnvXind = p_value...9 , EnvXnotext = p_value...17, notextXind = p_value...25)
+
+flextable(ztest.pvals,) %>% colformat_double(digits = 3) %>% save_as_docx(path = "tables/ztest.docx")
+
+
+```
+
+
+
+
+
+
+
+
