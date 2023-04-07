@@ -194,7 +194,7 @@ kable(ind_switch) %>%  kable_classic_2(full_width = T)
 
 #  Logit models
 
-```{r estimate logitmodels, eval=FALSE}
+```{r estimate logitmodels, eval=T}
 
 source("scripts/clogitmodels.R")
 source("scripts/mixlogitmodels.R")
@@ -242,7 +242,7 @@ rm(t,twtp, name, modelpath)
 
 ```{r individual wtp}
 library(purrr)
-library(cowplot)
+library(ggpubr)
 
 # Read in individual WTP estimates 
 individualWTP_notext <- readRDS("modeloutput/Individual_wtp/individualWTP_notext.rds")
@@ -265,9 +265,9 @@ plot_wtp <- function(var_name) {
 # apply the function to each variable in individualWTP data frames
 plot_list <- map(names(individualWTP_env), plot_wtp)
 
-# plot, but use ggarrange to have one common legend
-plot_grid(plotlist = plot_list, nrow = 2, ncol = 4)
-ggsave("Figure_revision/individualWTP.png", width = 14, height = 10, dpi="print")
+# plot densities 
+ggarrange(plotlist = plot_list, nrow = 2, ncol = 4, common.legend = T, legend = "bottom")
+ggsave("Figure_revision/individualWTP.png", width = 16, height =9, dpi="print")
 ```
 
 ```{r season, eval=T}
@@ -298,7 +298,7 @@ ggplot(data=mxl_melt_season, aes(x=Coefficent, y=abs(value), fill=variable)) +
   geom_errorbar(aes(x=Coefficent, ymin=abs(value)-ME, ymax=abs(value)+ME), width=0.3, position=position_dodge(0.8)) +
   ylab("Absolute Value") +
   scale_x_discrete(guide = guide_axis(angle = 45)) +
-  scale_fill_brewer(palette = 3, labels = c("Winter", "Summer"), name="Season") +
+  scale_fill_brewer(palette = 7, labels = c("Winter", "Summer"), name="Season") +
   theme(legend.position = c(0.9, 0.85))
 
 ggsave("Figure_revision/season.png", dpi = "print",  width = 10.5, height = 7.5)
@@ -333,7 +333,7 @@ ggplot(data=mxl_melt_tomato, aes(x=Coefficent, y=abs(value), fill=variable)) +
   geom_errorbar(aes(x=Coefficent, ymin=abs(value)-ME, ymax=abs(value)+ME), width=0.3, position=position_dodge(0.8)) +
   ylab("Absolute Value") +
   scale_x_discrete(guide = guide_axis(angle = 45)) +
-  scale_fill_brewer(palette = 3, labels = c("Small", "Big"), name="Tomato") +
+  scale_fill_brewer(palette = 13, labels = c("Small", "Big"), name="Tomato") +
   theme(legend.position = c(0.9, 0.85))
 
 ggsave("Figure_revision/tomato.png", dpi = "print",  width = 10.5, height = 7.5)
