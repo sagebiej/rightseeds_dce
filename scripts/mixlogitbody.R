@@ -56,7 +56,7 @@ apollo_beta=c(mean_asc = 1.2,
               sd_DE = 0.5,
               sd_ESP = 0.5,
               sd_EIGENT = 0.4,
-              mean_cost = 0.1,
+              mean_cost = -0.1,
               sd_cost=0.3
 )
 draws  <- paste0("draws_",randnames)
@@ -122,10 +122,10 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
   
   ### List of utilities (later integrated in mnl_settings below)
   V = list()
-  V[['alt1']] =  -cost*(-a1_x1 +
+  V[['alt1']] =  cost*(-a1_x1 +
                           asc + ascwinter*winter + ascfemale*Female_s + ascage*Age_s + aschigheredu*HigherEdu_s + ascincome*Income_s + 
                           EUBIO*a1_EUBIO + BIOVER*a1_BIOVER + REG*a1_REG + DE*a1_DE + ESP*a1_ESP  + EIGENT*a1_x4 +EIGENTxOC*a1_x4*oc)
-  V[['alt2']] = -cost*(-a2_x1 + 
+  V[['alt2']] = cost*(-a2_x1 + 
                         asc+ ascwinter*winter + ascfemale*Female_s + ascage*Age_s + aschigheredu*HigherEdu_s + ascincome*Income_s +
                          EUBIO*a2_EUBIO + BIOVER*a2_BIOVER  + REG*a2_REG + DE*a2_DE  + ESP*a2_ESP  + EIGENT*a2_x4 +EIGENTxOC*a2_x4*oc)  
   V[['alt3']] = 0

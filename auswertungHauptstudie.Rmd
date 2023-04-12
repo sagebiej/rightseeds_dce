@@ -1,5 +1,5 @@
 ---
-title: "Supplementory material for Consumers' preferences for commons-based and open-source tomatoes: A discrete choice experiment Code for Analysis"
+title: "Supplementary material for Consumers' preferences for commons-based and open-source tomatoes: A discrete choice experiment Code for Analysis"
 author: " Lea Kliem and Julian Sagebiel"
 date: "07/06/2020"
 output: html_document
@@ -340,6 +340,13 @@ ggsave("Figure_revision/tomato.png", dpi = "print",  width = 10.5, height = 7.5)
 
 
 ```
+
+
+
+#latent class analysis
+
+
+
 
 
 ```{r clogittables, results='asis'}

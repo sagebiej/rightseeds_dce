@@ -18,7 +18,7 @@ apollo_control = list(
   modelName  ="clog_allsamples",
   modelDescr ="Simple MNL model with all respondents",
   indivID    ="RID", 
-  nCores=11,
+  nCores=1,
   outputDirectory = "modeloutput/"
 )
 

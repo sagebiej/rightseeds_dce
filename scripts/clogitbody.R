@@ -1,6 +1,6 @@
 apollo_beta=c(asc = 4,
               ascwinter =0,
-              cost = 0.7,
+              cost = -0.7,
               EUBIO = 1.17,
               BIOVER = 1.5,
               REG = 2.5 ,
@@ -30,12 +30,13 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
   
   ### List of utilities (later integrated in mnl_settings below)
   V = list()
-  V[['alt1']] =   cost*(asc -a1_x1 + ascwinter*winter + EUBIO*a1_EUBIO + BIOVER*a1_BIOVER +REG*a1_REG + DE*a1_DE + ESP*a1_ESP  + EIGENT*a1_x4+EIGENTxOC*a1_x4*oc)
-  V[['alt2']] =   cost*(asc -a2_x1 + ascwinter*winter + EUBIO*a2_EUBIO + BIOVER*a2_BIOVER + REG*a2_REG+ DE*a2_DE  + ESP*a2_ESP + EIGENT*a2_x4+EIGENTxOC*a2_x4*oc)  
+  V[['alt1']] =   -cost*(asc -a1_x1 + ascwinter*winter + EUBIO*a1_EUBIO + BIOVER*a1_BIOVER +REG*a1_REG + DE*a1_DE + ESP*a1_ESP  + EIGENT*a1_x4+EIGENTxOC*a1_x4*oc)
+  V[['alt2']] =   -cost*(asc -a2_x1 + ascwinter*winter + EUBIO*a2_EUBIO + BIOVER*a2_BIOVER + REG*a2_REG+ DE*a2_DE  + ESP*a2_ESP + EIGENT*a2_x4+EIGENTxOC*a2_x4*oc)
   V[['alt3']] = 0
   
-  # V[['alt1']] =  asc + cost*a1_x1 + EUBIO*a1_EUBIO + BIOVER*a1_BIOVER + DE*a1_DE + ESP*a1_ESP +MAR*a1_MAR + EIGENT*a1_x4
-  # V[['alt2']] = asc+ cost*a2_x1 + EUBIO*a2_EUBIO + BIOVER*a2_BIOVER + DE*a2_DE  + ESP*a2_ESP +MAR*a2_MAR + EIGENT*a2_x4   
+  # V[['alt1']] =  asc +  ascwinter*winter + cost*a1_x1 + EUBIO*a1_EUBIO + BIOVER*a1_BIOVER + REG*a1_REG + DE*a1_DE + ESP*a1_ESP + EIGENT*a1_x4 + EIGENTxOC*a1_x4*oc
+  # 
+  # V[['alt2']] =  asc +  ascwinter*winter + cost*a2_x1  + EUBIO*a2_EUBIO + BIOVER*a2_BIOVER + REG*a2_REG + DE*a2_DE + ESP*a2_ESP + EIGENT*a2_x4 + EIGENTxOC*a2_x4*oc
   
   ### Define settings for MNL model component
   mnl_settings = list(
