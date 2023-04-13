@@ -1,3 +1,6 @@
+
+
+
 apollo_beta=c(asc = 4,
               ascwinter =0,
               cost = -0.7,

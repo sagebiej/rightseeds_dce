@@ -1,7 +1,5 @@
 ## Estimate Mixed logit models
 
-No_draws =1200
-
 
 ## change sign of cost
 
@@ -50,56 +48,7 @@ for (n in fixednames) {
 
 apollo_beta <-beta
 
-# apollo_beta=c(mean_asc = 0,
-#               ascwinter =-0.04,
-#               mean_EUBIO = 0,
-#               mean_BIOVER = 0,
-#               mean_REG = 0,
-#               mean_DE = 0,
-#               mean_ESP = 0,
-#               mean_EIGENT = 0,
-#               EIGENTxOC = -0,
-#               sd_asc = 1 ,
-#               sd_EUBIO = 1,
-#               sd_BIOVER = 1,
-#               sd_REG=1,
-#               sd_DE = 0.1,
-#               sd_ESP = 1,
-#               sd_EIGENT = 1,
-#               mean_cost = 0.1,
-#               sd_cost=0.4
-# )
 
-# apollo_beta=c(mean_asc = 1.2,
-#               # ascwinter =-0.04,
-#               # ascfemale = 0,
-#               # ascage=0,
-#               # aschigheredu = 0,
-#               # ascincome=0,
-#               mean_EUBIO = 1,
-#               mean_BIOVER = 1.3,
-#               mean_REG = 2.5,
-#               mean_DE = 2,
-#               mean_ESP = 0.5,
-#               mean_EIGENT = 0.5,
-#               #EIGENTxOC = -0.06,
-#               sd_asc = 2 ,
-#               sd_EUBIO = 1,
-#               sd_BIOVER = 1,
-#               sd_REG=1,
-#               sd_DE = 0.5,
-#               sd_ESP = 0.5,
-#               sd_EIGENT = 0.4,
-#               mean_cost = 0.1,
-#               sd_cost=0.3,
-#               mean_EUBIOX = 1,
-#               mean_BIOVER = 1.3,
-#               mean_REG = 2.5,
-#               mean_DE = 2,
-#               mean_ESP = 0.5,
-#               mean_EIGENT = 0.5,
-#               
-# )
 draws  <- paste0("draws_",randnames)
 ### keine Parameter fix halten
 apollo_fixed <- c()

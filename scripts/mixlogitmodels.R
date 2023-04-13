@@ -1,6 +1,8 @@
 ## Estimate Mixed logit models
 
-No_draws =1500
+mixwtppath <- "modeloutput/WTPSpace/mixlogit_wtpspace/"
+mixprefpath <-"modeloutput/mixlogit_prefspace/"
+
 dir.create("modeloutput/Individual_wtp")
 
 ## change sign of cost
@@ -25,7 +27,7 @@ apollo_control = list(
  nCores=11,
   mixing = TRUE, # Mixed Logit
   HB=FALSE,
-  outputDirectory = "modeloutput/"
+  outputDirectory = mixwtppath
 )
 
 
@@ -36,9 +38,6 @@ mixlog_allsamples = apollo_estimate(apollo_beta, apollo_fixed,
                         apollo_probabilities, apollo_inputs, 
                         estimate_settings=list(maxIterations=400, estimationRoutine="bfgs",
                                                hessianRoutine="analytic"))
-
-
-
 
 
 apollo_saveOutput(mixlog_allsamples,  saveOutput_settings = list(saveCov=FALSE, saveCorr=FALSE))  
@@ -60,7 +59,7 @@ apollo_control = list(
   nCores=11,
   mixing = TRUE, # Mixed Logit
   HB=FALSE,
-  outputDirectory = "modeloutput/"
+  outputDirectory = mixwtppath
 )
 
 
@@ -97,7 +96,7 @@ apollo_control = list(
   nCores=11,
   mixing = TRUE, # Mixed Logit
   HB=FALSE,
-  outputDirectory = "modeloutput/"
+  outputDirectory = mixwtppath
 )
 
 
@@ -135,7 +134,7 @@ apollo_control = list(
   indivID    ="RID",  mixing = TRUE, # Mixed Logit
   nCores=11,
   HB=FALSE,
-  outputDirectory = "modeloutput/"
+  outputDirectory = mixwtppath
 )
 
 
@@ -174,7 +173,7 @@ apollo_control = list(
   indivID    ="RID",  mixing = TRUE, # Mixed Logit
   nCores=11,
   HB=FALSE,
-  outputDirectory = "modeloutput/"
+  outputDirectory = mixwtppath
 )
 
 
@@ -204,7 +203,7 @@ apollo_control = list(
   indivID    ="RID",  mixing = TRUE, # Mixed Logit
   nCores=11,
   HB=FALSE,
-  outputDirectory = "modeloutput/"
+  outputDirectory = mixwtppath
 )
 
 
@@ -235,7 +234,7 @@ apollo_control = list(
   indivID    ="RID",  mixing = TRUE, # Mixed Logit
   nCores=11,
   HB=FALSE,
-  outputDirectory = "modeloutput/"
+  outputDirectory = mixwtppath
 )
 
 
@@ -264,7 +263,7 @@ apollo_control = list(
   indivID    ="RID",  mixing = TRUE, # Mixed Logit
   nCores=11,
   HB=FALSE,
-  outputDirectory = "modeloutput/"
+  outputDirectory = mixwtppath
 )
 
 
@@ -294,7 +293,7 @@ apollo_control = list(
   indivID    ="RID",  mixing = TRUE, # Mixed Logit
   nCores=11,
   HB=FALSE,
-  outputDirectory = "modeloutput/"
+  outputDirectory = mixprefpath
 )
 
 
@@ -325,7 +324,7 @@ apollo_control = list(
   indivID    ="RID",  mixing = TRUE, # Mixed Logit
   nCores=11,
   HB=FALSE,
-  outputDirectory = "modeloutput/"
+  outputDirectory = mixprefpath
 )
 
 
@@ -354,7 +353,7 @@ apollo_control = list(
   indivID    ="RID",  mixing = TRUE, # Mixed Logit
   nCores=11,
   HB=FALSE,
-  outputDirectory = "modeloutput/"
+  outputDirectory = mixwtppath
 )
 
 

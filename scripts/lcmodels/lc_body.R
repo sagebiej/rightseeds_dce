@@ -11,7 +11,7 @@ database <- database2
 
 
 fixednames  <- c("asc"  , "cost" , "EUBIO" , "BIOVER"  ,"REG" ,  "DE",    "ESP",   "EIGENT" ,    "EIGENTxOC","delta" )
-n_classes=2
+
 
 apollo_initialise()
 
@@ -51,31 +51,26 @@ apollo_lcPars=function(apollo_beta, apollo_inputs){
     
   }
 
-  
-  
-  
   V=list()
   
   for (c in letters[seq_along(1:n_classes)]) {
     V[paste0("class_",c)] = get(paste0("delta_",c))
     
   }
-  # V[["class_a"]] = delta_a
-  # V[["class_b"]] = delta_b
 
   
   mnl_settings = list(
-    alternatives = c(class_a=1, class_b=2), 
+    alternatives = set_names(1:n_classes, paste0("class_",letters[1:n_classes])), 
     avail        = 1, 
     choiceVar    = NA, 
     V            = V
   )
   
   lcpars[["pi_values"]] = apollo_mnl(mnl_settings, functionality="raw")
-  
-  lcpars[["pi_values"]] = apollo_firstRow(lcpars[["pi_values"]], apollo_inputs)
+    lcpars[["pi_values"]] = apollo_firstRow(lcpars[["pi_values"]], apollo_inputs)
   
   return(lcpars)
+ 
 
 }
 
@@ -113,31 +108,31 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
   ### Loop over classes
   
   
-  for (s in 1:2) {
+  for (s in seq_along(1:n_classes)) {
     
     ### Compute class-specific utilities
      V=list()
 
 
-    V[['alt1']] = -cost[[s]]*(-a1_x1 +
-                           asc[[s]] +
-                           EUBIO[[s]]*a1_EUBIO + BIOVER[[s]]*a1_BIOVER + REG[[s]]*a1_REG + DE[[s]]*a1_DE + ESP[[s]]*a1_ESP  + EIGENT[[s]]*a1_x4 +EIGENTxOC[[s]]*a1_x4*oc)
-
-        V[['alt2']] = -cost[[s]]*(-a2_x1 +
-                              asc[[s]] +
-                              EUBIO[[s]]*a2_EUBIO + BIOVER[[s]]*a2_BIOVER + REG[[s]]*a2_REG + DE[[s]]*a2_DE + ESP[[s]]*a2_ESP  + EIGENT[[s]]*a2_x4 +EIGENTxOC[[s]]*a2_x4*oc)
+    # V[['alt1']] = -cost[[s]]*(-a1_x1 +
+    #                        asc[[s]] +
+    #                        EUBIO[[s]]*a1_EUBIO + BIOVER[[s]]*a1_BIOVER + REG[[s]]*a1_REG + DE[[s]]*a1_DE + ESP[[s]]*a1_ESP  + EIGENT[[s]]*a1_x4 +EIGENTxOC[[s]]*a1_x4*oc)
+    # 
+    #     V[['alt2']] = -cost[[s]]*(-a2_x1 +
+    #                           asc[[s]] +
+    #                           EUBIO[[s]]*a2_EUBIO + BIOVER[[s]]*a2_BIOVER + REG[[s]]*a2_REG + DE[[s]]*a2_DE + ESP[[s]]*a2_ESP  + EIGENT[[s]]*a2_x4 +EIGENTxOC[[s]]*a2_x4*oc)
 
      
      
-     # V[['alt1']] = cost[[s]]*a1_x1 +
-     #                             asc[[s]] + 
-     #                             EUBIO[[s]]*a1_EUBIO + BIOVER[[s]]*a1_BIOVER + REG[[s]]*a1_REG + DE[[s]]*a1_DE + ESP[[s]]*a1_ESP  + EIGENT[[s]]*a1_x4 +EIGENTxOC[[s]]*a1_x4*oc
-     # 
-     # V[['alt2']] = cost[[s]]*a2_x1 +
-     #                             asc[[s]] + 
-     #                             EUBIO[[s]]*a2_EUBIO + BIOVER[[s]]*a2_BIOVER + REG[[s]]*a2_REG + DE[[s]]*a2_DE + ESP[[s]]*a2_ESP  + EIGENT[[s]]*a2_x4 +EIGENTxOC[[s]]*a2_x4*oc 
-     # 
-     # 
+     V[['alt1']] = cost[[s]]*a1_x1 +
+                                 asc[[s]] +
+                                 EUBIO[[s]]*a1_EUBIO + BIOVER[[s]]*a1_BIOVER + REG[[s]]*a1_REG + DE[[s]]*a1_DE + ESP[[s]]*a1_ESP  + EIGENT[[s]]*a1_x4 +EIGENTxOC[[s]]*a1_x4*oc
+
+     V[['alt2']] = cost[[s]]*a2_x1 +
+                                 asc[[s]] +
+                                 EUBIO[[s]]*a2_EUBIO + BIOVER[[s]]*a2_BIOVER + REG[[s]]*a2_REG + DE[[s]]*a2_DE + ESP[[s]]*a2_ESP  + EIGENT[[s]]*a2_x4 +EIGENTxOC[[s]]*a2_x4*oc
+
+
     V[['alt3']] = 0 
     
     

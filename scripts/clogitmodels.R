@@ -1,8 +1,7 @@
 ## Estimate clogit model
 
-# database2 <- database2 %>% 
-#   mutate(across(ends_with("x1"), ~abs(.x)*(-1)))
 
+clpath <- "modeloutput/WTPSpace/clogit_wtpspace/"
 
 ##### All respondents ####
 
@@ -19,7 +18,7 @@ apollo_control = list(
   modelDescr ="Simple MNL model with all respondents",
   indivID    ="RID", 
   nCores=1,
-  outputDirectory = "modeloutput/"
+  outputDirectory = clpath
 )
 
 
@@ -37,6 +36,8 @@ clog_allsamples = apollo_estimate(apollo_beta, apollo_fixed,
 
 apollo_saveOutput(clog_allsamples,  saveOutput_settings = list(saveCov=FALSE, saveCorr=FALSE))  
 
+
+
 #### Split1 No Text####
 
 
@@ -51,7 +52,7 @@ apollo_control = list(
   modelName  ="clog_split_notext",
   modelDescr ="Simple MNL model pilot split samples No Text",
   indivID    ="RID",
-  outputDirectory = "modeloutput/"
+  outputDirectory = clpath
 )
 
 
@@ -86,7 +87,7 @@ apollo_control = list(
   modelName  ="clog_split_env",
   modelDescr ="Simple MNL model pilot split samples Environment",
   indivID    ="RID",
-  outputDirectory = "modeloutput/"
+  outputDirectory = clpath
 )
 
 
@@ -120,7 +121,7 @@ apollo_control = list(
   modelName  ="clog_split_ind",
   modelDescr ="Simple MNL model pilot split samples Industry",
   indivID    ="RID",
-  outputDirectory = "modeloutput/"
+  outputDirectory = clpath
 )
 
 

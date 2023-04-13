@@ -19,9 +19,9 @@ moveold <- function(){
 
 
 wtp <- function(cost, attr, modelname) {
- 
+  
   wtp_values =data.frame(wtp =numeric(), robse=numeric() , robt= numeric() ) 
-  attr <- attr[!(attr==cost)]
+  attr <- attr[-which(attr==cost)]
   
   for (a in attr) {
     
@@ -199,19 +199,60 @@ ass_labels <- function(path, seelab=TRUE, lower=FALSE) {
 
 
 
+# function to split model into different columns for texreg
+
+subcoef <- function(condition, mname){
+  
+  sub <- grep(condition,slot(mname,"coef.names"))
+  
+  for (ele in c("coef.names","coef","se","pvalues"))  {
+    elements<- slot(mname,ele)[sub]
+    slot(mname,ele) <- elements
+  }
+  
+  slot(mname,"coef.names")<-gsub(pattern = condition,replacement = "",x =slot(mname,"coef.names") )  
+  
+  slot(mname,"model.name")<-gsub("_","",condition)  
+  
+  
+  return(mname)
+  
+}
+
+#ff<- subcoef(mname=rpl,condition = "mean_")
+
+
+
+remGOF<- function(models){
+
+ gof<- function(m){  
+slot(m,"gof.names")<- character(0)
+slot(m,"gof")<- numeric(0)
+slot(m,"gof.decimal")<- logical(0)
+
+return(m)
+}
+  
+return(purrr::map(models,gof)) 
+  
+}
+
+#tes <- remGOF(rpl_cols[2:5])
+
+
 #z-test with apollo data
 
 apollo_ztest <- function(model1, model2, hyp=0){
-
-
   
   comp = data.frame(m1par =model1[["estimate"]] ,m2par = model2[["estimate"]] , m1se=model1[["robse"]] , m2se=model2[["robse"]]) %>%   
+    
     mutate(diffmean=m1par-m2par , error= sqrt(m1se^2+m2se^2) , z= diffmean/error , p_value=2*pnorm(-abs(z)))
-
-print(comp)
-cat(class(comp))
-
-return(comp)  
-
+  
+  
+  print(comp)
+  
+  cat(class(comp))
+  
+  return(comp)  
+  
 }
-

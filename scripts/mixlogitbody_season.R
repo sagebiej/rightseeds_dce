@@ -16,48 +16,7 @@ for (n in fixednames) {
   beta[n]= 0     
 }
 
-# apollo_beta=c(mean_asc = 0,
-#               ascwinter =-0.04,
-#               mean_EUBIO = 0,
-#               mean_BIOVER = 0,
-#               mean_REG = 0,
-#               mean_DE = 0,
-#               mean_ESP = 0,
-#               mean_EIGENT = 0,
-#               EIGENTxOC = -0,
-#               sd_asc = 1 ,
-#               sd_EUBIO = 1,
-#               sd_BIOVER = 1,
-#               sd_REG=1,
-#               sd_DE = 0.1,
-#               sd_ESP = 1,
-#               sd_EIGENT = 1,
-#               mean_cost = 0.1,
-#               sd_cost=0.4
-# )
 
-apollo_beta=c(mean_asc = 1.2,
-              ascfemale = 0,
-              ascage=0,
-              aschigheredu = 0,
-              ascincome=0,
-              mean_EUBIO = 1,
-              mean_BIOVER = 1.3,
-              mean_REG = 2.5,
-              mean_DE = 2,
-              mean_ESP = 0.5,
-              mean_EIGENT = 0.5,
-              EIGENTxOC = -0.06,
-              sd_asc = 2 ,
-              sd_EUBIO = 1,
-              sd_BIOVER = 1,
-              sd_REG=1,
-              sd_DE = 0.5,
-              sd_ESP = 0.5,
-              sd_EIGENT = 0.4,
-              mean_cost = 0.1,
-              sd_cost=0.3
-)
 draws  <- paste0("draws_",randnames)
 ### keine Parameter fix halten
 apollo_fixed <- c()
@@ -122,10 +81,10 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
   ### List of utilities (later integrated in mnl_settings below)
   V = list()
   V[['alt1']] =  -cost*(-a1_x1 +
-                          asc + ascfemale*Female_s + ascage*Age_s + aschigheredu*HigherEdu_s + ascincome*Income_s + 
+                          asc + 
                           EUBIO*a1_EUBIO + BIOVER*a1_BIOVER + REG*a1_REG + DE*a1_DE + ESP*a1_ESP  + EIGENT*a1_x4 +EIGENTxOC*a1_x4*oc)
   V[['alt2']] = -cost*(-a2_x1 + 
-                        asc + ascfemale*Female_s + ascage*Age_s + aschigheredu*HigherEdu_s + ascincome*Income_s +
+                        asc + 
                          EUBIO*a2_EUBIO + BIOVER*a2_BIOVER  + REG*a2_REG + DE*a2_DE  + ESP*a2_ESP  + EIGENT*a2_x4 +EIGENTxOC*a2_x4*oc)  
   V[['alt3']] = 0
   
