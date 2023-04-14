@@ -1,10 +1,7 @@
 ## Estimate Mixed logit models
 
 
-## change sign of cost
-
-# database2 <- database2 %>% 
-#   mutate(across(ends_with("x1"), ~abs(.x)*(-1)))
+mixwtppath <- "modeloutput/WTPSpace/mixlogit_wtpspace/"
 
 ##### All respondents ####
 
@@ -23,7 +20,7 @@ apollo_control = list(
   nCores=11,
   mixing = TRUE, # Mixed Logit
   HB=FALSE,
-  outputDirectory = "modeloutput/"
+  outputDirectory = mixwtppath
 )
 
 

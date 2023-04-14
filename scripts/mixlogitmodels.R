@@ -310,7 +310,7 @@ mixlog_pref_space = apollo_estimate(apollo_beta, apollo_fixed,
 apollo_saveOutput(mixlog_pref_space,  saveOutput_settings = list(saveCov=FALSE, saveCorr=FALSE))
 
 
-##### Estimate standard model in WTP space with fixed price
+##### Estimate standard model in preference space with fixed price
 
 
 database<-database2

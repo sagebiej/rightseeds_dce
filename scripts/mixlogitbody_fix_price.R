@@ -16,7 +16,7 @@ for (n in fixednames) {
   beta[n]= 0     
 }
 
-
+apollo_beta <- beta
 draws  <- paste0("draws_",randnames)
 ### keine Parameter fix halten
 apollo_fixed <- c()
@@ -79,12 +79,12 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
   
   ### List of utilities (later integrated in mnl_settings below)
   V = list()
-  V[['alt1']] =  -mean_cost*(-a1_x1 +
+  V[['alt1']] =  mean_cost*a1_x1 +
                           asc + ascwinter*winter + 
-                          EUBIO*a1_EUBIO + BIOVER*a1_BIOVER + REG*a1_REG + DE*a1_DE + ESP*a1_ESP  + EIGENT*a1_x4 +EIGENTxOC*a1_x4*oc)
-  V[['alt2']] = -mean_cost*(-a2_x1 + 
+                          EUBIO*a1_EUBIO + BIOVER*a1_BIOVER + REG*a1_REG + DE*a1_DE + ESP*a1_ESP  + EIGENT*a1_x4 +EIGENTxOC*a1_x4*oc
+  V[['alt2']] = mean_cost*a2_x1 + 
                         asc+ ascwinter*winter + 
-                         EUBIO*a2_EUBIO + BIOVER*a2_BIOVER  + REG*a2_REG + DE*a2_DE  + ESP*a2_ESP  + EIGENT*a2_x4 +EIGENTxOC*a2_x4*oc)  
+                         EUBIO*a2_EUBIO + BIOVER*a2_BIOVER  + REG*a2_REG + DE*a2_DE  + ESP*a2_ESP  + EIGENT*a2_x4 +EIGENTxOC*a2_x4*oc  
   V[['alt3']] = 0
   
   

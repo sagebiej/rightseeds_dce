@@ -16,7 +16,7 @@ for (n in fixednames) {
   beta[n]= 0     
 }
 
-
+apollo_beta <- beta
 draws  <- paste0("draws_",randnames)
 ### keine Parameter fix halten
 apollo_fixed <- c()

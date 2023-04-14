@@ -273,31 +273,29 @@ rm(t, name, modelpath)
 
 
 
-
-
-
-  
-
-
-
 modelpath <-list.files(path = "modeloutput/mixlogit_prefspace/",pattern = "rds$" , full.names = TRUE)
-models_tex <- list()
-models <- list()
+
+modelsWTP <- list()
+modelsWTP_tex <- list()
+
 
 
 for (name in modelpath) {
 
 t <- readRDS(name)
-twtp <- wtp("cost",attr = names(t$estimate) , modelname=t) # only relevant if models are not estimated in WTP space
+
+if(t$fixed[["mean_cost"]]) mcost=FALSE else mcost=TRUE
+
+twtp <- wtp("mean_cost",attr = names(t$estimate) , modelname=t ,mediancost = mcost) # only relevant if models are not estimated in WTP space
 
 models[[t$apollo_control$modelName]] <-t
 models_tex[[t$apollo_control$modelName]] <-quicktexregapollo(t)
-clmodelsWTP[[t$apollo_control$modelName]]<-twtp
-clmodelsWTP_tex[[t$apollo_control$modelName]] <- quicktexregapollo(model=t,wtpest = twtp)
+modelsWTP[[t$apollo_control$modelName]]<-twtp
+modelsWTP_tex[[t$apollo_control$modelName]] <- quicktexregapollo(model=t,wtpest = twtp)
 
 }
 
-rm(t,twtp, name, modelpath)
+#rm(t,twtp, name, modelpath)
   
  
 
@@ -416,7 +414,7 @@ colnames(mxl_season_compare) <- c("Coefficent", "Estimate_winter", "Estimate_sum
 
 mxl_melt_season <- melt(mxl_season_compare[1:3], id = "Coefficent")
 mxl_melt_season$ME <- mxl_season_compare$Margin_of_error_winter
-mxl_melt_season$ME[22:42] <- mxl_season_compare$Margin_of_error_summer
+mxl_melt_season$ME[18:34] <- mxl_season_compare$Margin_of_error_summer
 
 
 ggplot(data=mxl_melt_season, aes(x=Coefficent, y=abs(value), fill=variable)) +
@@ -462,7 +460,7 @@ colnames(mxl_tomato_compare) <- c("Coefficent", "Estimate_small", "Estimate_big"
 
 mxl_melt_tomato <- melt(mxl_tomato_compare[1:3], id = "Coefficent")
 mxl_melt_tomato$ME <- mxl_tomato_compare$Margin_of_error_small
-mxl_melt_tomato$ME[23:44] <- mxl_tomato_compare$Margin_of_error_big
+mxl_melt_tomato$ME[19:36] <- mxl_tomato_compare$Margin_of_error_big
 
 
 ggplot(data=mxl_melt_tomato, aes(x=Coefficent, y=abs(value), fill=variable)) +
@@ -475,9 +473,7 @@ ggplot(data=mxl_melt_tomato, aes(x=Coefficent, y=abs(value), fill=variable)) +
 
 ```
 
-```{r, include=F}
-ggsave("Figure_revision/tomato.png", dpi = "print",  width = 10.5, height = 7.5)
-```
+
 
 
 ```{r, results='asis'}
@@ -672,5 +668,17 @@ htmlreg(l = mixmodelsWTP_tex  ,
 
 
 ``` 
+ 
+```{r pref space_wtp, results='asis'}
+
+mixmodelsWTP_tex <- modelsWTP_tex
+
+htmlreg(l = mixmodelsWTP_tex  ,
+        custom.model.names = c("Log-normal price", "Fixed price") ,  caption = "Results from models in preference space as WTP values" , single.row = T  , 
+        custom.note = "***p < 0.001; **p < 0.01; *p < 0.05 Standard Errors in Brackets" , center = TRUE, doctype = FALSE )
+
+
+```  
+ 
   
 </details>
