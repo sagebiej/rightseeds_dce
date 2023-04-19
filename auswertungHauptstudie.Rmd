@@ -112,11 +112,11 @@ left_join(rightseeds_live_pages, by="RID") %>%
 
 
 # Descriptive Analysis
+We look at the frequencies of attribute levels and correlations between attributes. This should confirm that the design is balanced and orthogonal.
 
 <details>
   <summary>Descriptive Analysis</summary>
 
-We look at the frequencies of attribute levels and correlations between attributes. This should confirm that the design is balanced and orthogonal.
 
 ```{r design, eval=TRUE}
 
@@ -203,10 +203,12 @@ kable(ind_switch) %>%  kable_classic_2(full_width = T)
 
 #  Logit Models
 
+The following chunk will estimate the logit models. It is set to `eval = FALSE` as default because estimation takes long. To replicate the analysis, one has to run this chunk only once. The files will be saved as R objects in the local folder.
+
 <details>
   <summary>Logit Models</summary>
 
-The following chunk will estimate the logit models. It is set to `eval = FALSE` as default because estimation takes long. To replicate the analysis, one has to run this chunk only once. The files will be saved as R objects in the local folder.
+
 
 ```{r estimate logitmodels, eval=FALSE}
 
@@ -231,7 +233,7 @@ map(2:6, function(x) {n_classes <<- x
 
 ```
 
-
+The following chunks read in estimated models
 
 ```{r readinsavedWTPModel, eval=T, results='hide'}
 
@@ -284,7 +286,9 @@ for (name in modelpath) {
 
 t <- readRDS(name)
 
-if(t$fixed[["mean_cost"]]) mcost=FALSE else mcost=TRUE
+if(any(t$apollo_draws$interNormDraws %in% "draws_cost")) mcost=TRUE else mcost=FALSE
+
+print(mcost)
 
 twtp <- wtp("mean_cost",attr = names(t$estimate) , modelname=t ,mediancost = mcost) # only relevant if models are not estimated in WTP space
 
@@ -347,10 +351,12 @@ rm(t,twtp, name, modelpath)
 
 # Appendix A: Individual Willingness to pay values
 
+Based on the models presented in the main  text, the following present individual (conditional) willingness to pay values.
+
 <details>
   <summary>Appendix A: Individual Willingness to pay values</summary>
 
-```{r individual wtp}
+```{r individual wtp, out.width="120%"}
 library(purrr)
 library(ggpubr)
 
@@ -358,6 +364,12 @@ library(ggpubr)
 individualWTP_notext <- readRDS("modeloutput/Individual_wtp/individualWTP_notext.rds")
 individualWTP_ind <- readRDS("modeloutput/Individual_wtp/individualWTP_ind.rds")
 individualWTP_env <- readRDS("modeloutput/Individual_wtp/individualWTP_env.rds")
+
+# names of the attributes
+attribute_names <- c("ASC", "EU Organic", "EU Organic + Bioverita", "Local", "Germany", "Spain", "Open-source/commons", "Price")
+names(individualWTP_env)<- attribute_names 
+names(individualWTP_ind)<- attribute_names 
+names(individualWTP_notext)<- attribute_names 
 
 # Define a function that takes a variable name as input and returns a ggplot object
 plot_wtp <- function(var_name) {
@@ -369,11 +381,12 @@ plot_wtp <- function(var_name) {
     xlab("WTP") +
     ylab("Density") +
     labs(col="Treatment") +
-    theme(legend.position = c(0.15, 0.85))
+    theme(legend.position = c(0.15, 0.85),title = element_text(size=7))
 }
 
 # apply the function to each variable in individualWTP data frames
 plot_list <- map(names(individualWTP_env), plot_wtp)
+
 
 # plot densities 
 ggarrange(plotlist = plot_list, nrow = 2, ncol = 4, common.legend = T, legend = "bottom")
@@ -386,6 +399,8 @@ ggsave("Figure_revision/individualWTP.png", width = 16, height =9, dpi="print")
 </details>
 
 # Appendix B: Models separated by season
+
+Respondents were randomly assigned into either a winter or a summer scenario. The following output shows two mixed logit models in WTP space separated by winter and summer samples.
 
 <details>
   <summary>Appendix B: Models separated by season</summary>
@@ -427,16 +442,20 @@ ggplot(data=mxl_melt_season, aes(x=Coefficent, y=abs(value), fill=variable)) +
 
 ```
 
-```{r, results='asis'}
+```{r season table, results='asis'}
 mixmodelsWTP_tex <- models_tex[c("mixlog_season_winter", "mixlog_season_summer") ]
 
+coef_names <- c("ASC: Mean", "ASC: Standard deviation", "EU Organic: Mean", "EU Organic: Standard deviation", "EU Organic + Bioverita: Mean", "EU Organic + Bioverita: Standard Deviation", "Local: Mean", "Local: Standard deviation", "Germany: Mean", "Germany: Standard deviation", "Spain: Mean", "Spain: Standard deviation", "Open-source/commons: Mean", "Open-source/commons: Standard deviation", "Price: Mean", "Price: Standard deviation", "Ownership x Open-source vs. commons")
+
 htmlreg(l = mixmodelsWTP_tex  ,
-        custom.model.names = c("Winter", "Summer") ,  caption = "Results for mixed logit model for the two different seasons" , single.row = T  , 
+        custom.model.names = c("Winter", "Summer") ,  caption = "Results for mixed logit model for the two different seasons" , single.row = T  , custom.coef.names = coef_names,
         custom.note = "***p < 0.001; **p < 0.01; *p < 0.05 Standard Errors in Brackets" , center = TRUE, doctype = FALSE)
 ```
 
 
 # Appendix C: Models separated by Tomato Type
+
+The following shows mixed logit models in WTP space separated by tomato type. Before starting with the choice experiment, respondents could choose whether they purchase cherry tomatoes or flesh tomatos.
 
 <details>
   <summary>Appendix C: Models separated by Tomato Type</summary>
@@ -476,17 +495,20 @@ ggplot(data=mxl_melt_tomato, aes(x=Coefficent, y=abs(value), fill=variable)) +
 
 
 
-```{r, results='asis'}
+```{r tomato table, results='asis'}
 mixmodelsWTP_tex <- models_tex[c("mixlog_small_tomato", "mixlog_big_tomato") ]
 
+coef_names <- c("ASC: Mean", "ASC: Standard deviation", "EU Organic: Mean", "EU Organic: Standard deviation", "EU Organic + Bioverita: Mean", "EU Organic + Bioverita: Standard Deviation", "Local: Mean", "Local: Standard deviation", "Germany: Mean", "Germany: Standard deviation", "Spain: Mean", "Spain: Standard deviation", "Open-source/commons: Mean", "Open-source/commons: Standard deviation", "Price: Mean", "Price: Standard deviation", "ASC x Winter", "Ownership x Open-source vs. commons")
+
 htmlreg(l = mixmodelsWTP_tex  ,
-        custom.model.names = c("Small Tomato", "Big Tomato") ,  caption = "Results for mixed logit model for the two different tomato types" , single.row = T  , 
+        custom.model.names = c("Small Tomato", "Big Tomato") ,  caption = "Results for mixed logit model for the two different tomato types" , single.row = T  , custom.coef.names = coef_names,
         custom.note = "***p < 0.001; **p < 0.01; *p < 0.05 Standard Errors in Brackets" , center = TRUE, doctype = FALSE)
 ```
 </details>
 
 # Appendix D: Latent Class Analysis
 
+ Additionally to the mixed logit models, we estimate latent class models with two to six classes. 
 <details>
   <summary>Appendix D: Latent Class Analysis</summary>
 
@@ -498,9 +520,12 @@ nclasses <-length(lcmodels[[clno]]$LL0)-1
 clshare <- round(100*sapply(lcmodels[[clno]][["unconditionals"]][["pi_values"]],mean), digits = 1  ) 
 modelnames <- sprintf("Class %d",seq(1:nclasses ))
 
+coef_names <- c("ASC", "EU Organic", "EU Organic + Bioverita", "Local", "Germany", "Spain",
+                "Open-source/commons", "Ownership x Open-source vs. commons", "Delta")
+
 print(
 htmlreg(lcmodelsWTP_tex[[clno]] ,
-       single.row = TRUE ,
+       single.row = TRUE , custom.coef.names = coef_names, 
       # custom.model.names = paste0("\\specialcell{",modelnames, "\\\\  (" , clshare , "\\%)}") ,
        caption = paste0("WTP values of latent class model with " ,nclasses, " classes" ),
        #groups = list("WTP"=1:6, "Membership" = 7:length(lcmodelsWTP_tex[["lc2cl"]][["Class2"]]@coef.names) )
@@ -513,8 +538,19 @@ htmlreg(lcmodelsWTP_tex[[clno]] ,
 
 ```
 
+```{r lc compare, include=F}
+source("scripts/compare_lcmodels_correct.R")
+```
+
+```{r lc graph}
+gof_lc_graph
+```
+
+
 
 # Appendix E: Conditional Logit models
+
+We present conditional logit models which served as starting point for the analysis.
 
 <details>
   <summary>Appendix E: Conditional Logit models</summary>
@@ -523,8 +559,10 @@ htmlreg(lcmodelsWTP_tex[[clno]] ,
 
 clmodelsWTP_tex <- models_tex[c("clog_allsamples",  "clog_split_notext" , "clog_split_env"  ,  "clog_split_ind") ]
 
+coef_names <- c("ASC", "ASC x Winter", "Price", "EU Organic", "EU Organic + Bioverita", "Local", "Germany", "Spain",
+                "Open-source/commons", "Ownership x Open-source vs. commons")
 htmlreg(l = clmodelsWTP_tex , 
-        custom.model.names = c("Full Sample", "No Text", "Environment" , "Industry") ,  caption = "Results from Infotext Splits" , single.row = T  , 
+        custom.model.names = c("Full Sample", "No Text", "Environment" , "Industry") , custom.coef.names = coef_names,  caption = "Results from Infotext Splits" , single.row = T  , 
         custom.note = "***p < 0.001; **p < 0.01; *p < 0.05 Standard Errors in Brackets" , center = TRUE, doctype = FALSE )
 
 
@@ -533,6 +571,8 @@ htmlreg(l = clmodelsWTP_tex ,
 
 # Appendix F: Models used in paper
 
+The following chunks replicate the models used in the main text
+
 <details>
   <summary>Appendix F: Models used in paper</summary>
 
@@ -540,7 +580,9 @@ htmlreg(l = clmodelsWTP_tex ,
 
 mixmodelsWTP_tex <- models_tex[c("mixlog_allsamples",  "mixlog_split_notext" , "mixlog_split_env"  ,  "mixlog_split_ind") ]
 
-htmlreg(l = mixmodelsWTP_tex  ,
+coef_names <- c("ASC: Mean", "ASC: Standard deviation", "EU Organic: Mean", "EU Organic: Standard deviation", "EU Organic + Bioverita: Mean", "EU Organic + Bioverita: Standard Deviation", "Local: Mean", "Local: Standard deviation", "Germany: Mean", "Germany: Standard deviation", "Spain: Mean", "Spain: Standard deviation", "Open-source/commons: Mean", "Open-source/commons: Standard deviation", "Price: Mean", "Price: Standard deviation", "ASC x Winter", "Ownership x Open-source vs. commons")
+
+htmlreg(l = mixmodelsWTP_tex  , custom.coef.names = coef_names,
         custom.model.names = c("Full Sample", "No Text", "Environment" , "Industry") ,  caption = "Results from Infotext Splits with mixed logit models" , single.row = T  , 
         custom.note = "***p < 0.001; **p < 0.01; *p < 0.05 Standard Errors in Brackets" , center = TRUE, doctype = FALSE )
 
@@ -549,6 +591,9 @@ htmlreg(l = mixmodelsWTP_tex  ,
 
 
 # Appendix G: Pooled Model with Information Splits
+
+To investigate treatment effects further, we estimate one model with all respondents and interaction terms with all attributes and the information splits.
+
 
 <details>
   <summary>Appendix G: Pooled Model with Information Splits</summary>
@@ -586,8 +631,9 @@ intmodel_split <- map(intmodel_split, ~ {
   .x
 })
 
-
-htmlreg(l = c(intmodel_split[1], remGOF(intmodel_split[2:4])) ,  custom.model.names = c("Mean", "Standard deviation", "Interaction Info 2", "Interaction Info 3"),
+coef_names <- c("ASC", "EU Organic", "EU Organic + Bioverita", "Local", "Germany", "Spain",
+                "Open-source/commons", "Price")
+htmlreg(l = c(intmodel_split[1], remGOF(intmodel_split[2:4])) ,  custom.model.names = c("Mean", "Standard deviation", "Interaction Info 2", "Interaction Info 3"), custom.coef.names = coef_names,
           caption = "Results from mixed logit model with interactions of information treatments" , single.row = T  , 
         
         custom.note = "***p < 0.001; **p < 0.01; *p < 0.05 Standard Errors in Brackets" , center = TRUE, doctype = FALSE )
@@ -596,6 +642,8 @@ htmlreg(l = c(intmodel_split[1], remGOF(intmodel_split[2:4])) ,  custom.model.na
 </details>
 
 # Appendix H: Z-Tests for differences in parameters between information splits
+
+We used z-tests to check for differences in information treatment models.
 
 <details>
   <summary>Appendix H: Z-Tests for differences in parameters between information splits</summary>
@@ -612,19 +660,20 @@ z.envXnotext <- apollo_ztest(models[["mixlog_split_env"]],models[["mixlog_split_
 z.notextXind <-apollo_ztest(models[["mixlog_split_notext"]],models[["mixlog_split_ind"]])
 
 
-# apollo_ztest(models[["clog_split_env"]],models[["clog_split_ind"]])
-# 
-# apollo_ztest(models[["clog_split_env"]],models[["clog_split_notext"]])
-# 
-# 
-# apollo_ztest(models[["clog_split_notext"]],models[["clog_split_ind"]])
+apollo_ztest(models[["clog_split_env"]],models[["clog_split_ind"]])
+
+apollo_ztest(models[["clog_split_env"]],models[["clog_split_notext"]])
+
+
+apollo_ztest(models[["clog_split_notext"]],models[["clog_split_ind"]])
 
 
 ztest.pvals <- z.envXind %>% 
   tibble::rownames_to_column() %>% 
   bind_cols(z.envXnotext,z.notextXind ) %>% 
-  select(Attribute = rowname,EnvXind = p_value...9 , EnvXnotext = p_value...17, notextXind = p_value...25)
+  select(EnvXind = p_value...9 , EnvXnotext = p_value...17, notextXind = p_value...25)
 
+rownames(ztest.pvals) <- coef_names <- c("ASC: Mean", "ASC: Standard deviation", "EU Organic: Mean", "EU Organic: Standard deviation", "EU Organic + Bioverita: Mean", "EU Organic + Bioverita: Standard Deviation", "Local: Mean", "Local: Standard deviation", "Germany: Mean", "Germany: Standard deviation", "Spain: Mean", "Spain: Standard deviation", "Open-source/commons: Mean", "Open-source/commons: Standard deviation", "Price: Mean", "Price: Standard deviation", "ASC x Winter", "Ownership x Open-source vs. commons")
 
 kable(ztest.pvals) %>% kable_styling()
 
@@ -637,6 +686,8 @@ kable(ztest.pvals) %>% kable_styling()
 
 # Appendix I: Model with familiarity interactions
 
+As we expect that people who are familiar with the attributes are more likely to have a high WTP for these attributes, we estimate a model with interactions of the respective attribute and the stated familiarity question.
+
 <details>
   <summary>Appendix I: Model with familiarity interactions</summary>
 
@@ -644,7 +695,9 @@ kable(ztest.pvals) %>% kable_styling()
 
 mixmodelsWTP_tex <- models_tex[c("mixlog_int_tab4")]
 
-htmlreg(l = mixmodelsWTP_tex  ,
+coef_names <- c("ASC: Mean", "ASC: Standard deviation", "EU Organic: Mean", "EU Organic: Standard deviation", "EU Organic + Bioverita: Mean", "EU Organic + Bioverita: Standard Deviation", "Local: Mean", "Local: Standard deviation", "Germany: Mean", "Germany: Standard deviation", "Spain: Mean", "Spain: Standard deviation", "Open-source/commons: Mean", "Open-source/commons: Standard deviation", "Price: Mean", "Price: Standard deviation", "ASC x Winter", "Ownership x Open-source vs. commons", "EU Organic: Familiarity interaction", "EU Organic + Bioverita: Familiarity interaction", "Open-source/commons: Familiarity interaction")
+
+htmlreg(l = mixmodelsWTP_tex  , custom.coef.names = coef_names,
         custom.model.names = c("Familiarity interactions") ,  caption = "Results from familiarityinteractions model" , single.row = T  , 
         custom.note = "***p < 0.001; **p < 0.01; *p < 0.05 Standard Errors in Brackets" , center = TRUE, doctype = FALSE )
 
@@ -655,15 +708,19 @@ htmlreg(l = mixmodelsWTP_tex  ,
 
 # Appendix J: Models in preference space 
 
+We also estimated mixed logit models in preference space. These models were also considered as the main models in the main text.
+
 <details>
   <summary>Appendix J: Models in preference space</summary>
 
 ```{r pref space, results='asis'}
 
-mixmodelsWTP_tex <- models_tex[c("mixlog_pref_space", "mixlog_fix_price")]
+mixmodelsWTP_tex <- models_tex[c("mixlog_fix_price", "mixlog_pref_space")]
+
+coef_names <- c("ASC: Mean", "ASC: Standard deviation", "EU Organic: Mean", "EU Organic: Standard deviation", "EU Organic + Bioverita: Mean", "EU Organic + Bioverita: Standard Deviation", "Local: Mean", "Local: Standard deviation", "Germany: Mean", "Germany: Standard deviation", "Spain: Mean", "Spain: Standard deviation", "Open-source/commons: Mean", "Open-source/commons: Standard deviation", "ASC x Winter", "Price: Mean", "Ownership x Open-source vs. commons", "Price: Standard deviation")
 
 htmlreg(l = mixmodelsWTP_tex  ,
-        custom.model.names = c("Log-normal price", "Fixed price") ,  caption = "Results from models in preference space" , single.row = T  , 
+        custom.model.names = c("Fixed price", "Log-normal price") ,  caption = "Results from models in preference space" , single.row = T  , custom.coef.names = coef_names,
         custom.note = "***p < 0.001; **p < 0.01; *p < 0.05 Standard Errors in Brackets" , center = TRUE, doctype = FALSE )
 
 
@@ -673,12 +730,61 @@ htmlreg(l = mixmodelsWTP_tex  ,
 
 mixmodelsWTP_tex <- modelsWTP_tex
 
+coef_names <- c("ASC", "EU Organic", "EU Organic + Bioverita", "Local", "Germany", "Spain",
+                "Open-source/commons", "ASC x Winter", "Ownership x Open-source vs. commons")
+
 htmlreg(l = mixmodelsWTP_tex  ,
-        custom.model.names = c("Log-normal price", "Fixed price") ,  caption = "Results from models in preference space as WTP values" , single.row = T  , 
-        custom.note = "***p < 0.001; **p < 0.01; *p < 0.05 Standard Errors in Brackets" , center = TRUE, doctype = FALSE )
+        custom.model.names = c("Fixed price", "Log-normal price") ,  caption = "Results from models in preference space as WTP values" , single.row = T  , custom.coef.names = coef_names,
+        custom.note = "***p < 0.001; **p < 0.01; *p < 0.05 Standard Errors in Brackets" , center = TRUE, doctype = FALSE , omit.coef = "^sd_") 
 
 
 ```  
- 
+</details>
+
+
+# Appendix I: Comparision of WTP across all models
+
+<details>
+  <summary>Appendix I: Comparision of WTP across all models</summary>
+
+We provide a table that compares mean and median (in case of log-normal cost coeffient in preference space) WTP across all models.
+
+```{r table lc_pre_all}
+library(stringr)
+source("scripts/function_lc_avg.R")
+wtp <- list()
+for (z in 2:6) {
+  num_classes <- z
+  wtp[[z-1]] <- calculate_avg_lc_wtp(lcmodels[[paste0(z, " Classes")]], lcmodelsWTP[[paste0("lc_", z, "class")]], num_classes)
+}
+
+lc_av_wtp <- as.data.frame(wtp)
+colnames(lc_av_wtp) <- names(lcmodels)
+rownames(lc_av_wtp) <- c("ASC", "EU Organic", "EU Organic + Bioverita", "Local", "Germany", "Spain", "Ownership","Ownership x Open-source vs. commons", "Delta")
+lc_av_wtp <- lc_av_wtp[1:8, ]
+
+#add pref space models 
+fx_wtp <-  as.data.frame(modelsWTP$mixlog_fix_price)
+fx_wtp$Coefficient <- rownames(fx_wtp)
+fx_wtp <- fx_wtp %>% filter(!grepl("^sd", Coefficient)) %>% filter(Coefficient!="ascwinter")
+
+log_wtp <- as.data.frame((modelsWTP$mixlog_pref_space))
+log_wtp$Coefficient <- rownames(log_wtp)
+log_wtp <- log_wtp %>% filter(!grepl("^sd", Coefficient)) %>% filter(Coefficient!="ascwinter")
+
+all_wtp <- as.data.frame(models$mixlog_allsamples$estimate)
+all_wtp$Coefficient <- rownames(all_wtp)
+colnames(all_wtp) <- c("wtp", "Coefficient")
+all_wtp <- all_wtp %>% filter(!grepl("^sd", Coefficient)) %>% filter(Coefficient!="ascwinter" & Coefficient!="mean_cost")
+
+lc_av_wtp$Fixed_Price <- fx_wtp$wtp
+lc_av_wtp$Log_normal_Price <- log_wtp$wtp
+lc_av_wtp$Full_sample_Wtp <- all_wtp$wtp
+
+kable(lc_av_wtp, digits = 4, caption = "Overview of the WTP values for the different models") %>%
+  kable_styling(full_width = FALSE)
+
+
+``` 
   
 </details>

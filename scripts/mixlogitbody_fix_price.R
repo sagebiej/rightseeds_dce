@@ -3,7 +3,7 @@
 #rm(apollo_inputs)
 
 randnames  <- c( "asc", "EUBIO" , "BIOVER" , "REG", "DE", "ESP" , "EIGENT"  )  
-fixednames  <- c( "ascwinter" , "cost", "EIGENTxOC")  
+fixednames  <- c( "ascwinter" , "mean_cost", "EIGENTxOC")  
 
 beta <- vector()
 

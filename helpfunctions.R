@@ -24,7 +24,7 @@ wtp <- function(cost, attr, modelname, mediancost=FALSE) {
   attr <- attr[-which(attr==cost)]
   
   
-  if (mediancost) {cost=paste0("exp(",cost,")")
+  if (mediancost) {cost=paste0("-exp(",cost,")")
     
   }
   
