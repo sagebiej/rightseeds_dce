@@ -5,6 +5,7 @@
 Figure_revision/
 Rightseeds.Rproj
 Rplots.pdf
+desktop.ini
 
 caluclatedurations.R
 choice sets.Rmd
@@ -39,3 +40,4 @@ swap_ortdes.R
 tables/
 testdelete.R
 auswertungHauptstudie_files/
+scripts/mixlogitbody_old.R

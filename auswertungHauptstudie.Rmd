@@ -1,11 +1,10 @@
 ---
 title: "Supplementary material for Consumers' preferences for commons-based and open-source produce: A discrete choice experiment with directional information manipulations."
-author: " Lea Kliem and Julian Sagebiel"
-date: "13/04/2022"
+author: " "
+date: "15/06/2023"
+
 output:
-  html_document:
-    toc: true
-    toc_float: true
+  bookdown::html_document2
 editor_options: 
   chunk_output_type: console
 ---
@@ -47,6 +46,7 @@ library("psych")
 library("kableExtra")
 library("tidylog")
 library("texreg")
+library("stringr")
 
 
 
@@ -349,7 +349,7 @@ rm(t,twtp, name, modelpath)
 ```
 </details>
 
-# Appendix A: Individual Willingness to pay values
+# Appendix A: Individual Willingness to Pay Values
 
 Based on the models presented in the main  text, the following present individual (conditional) willingness to pay values.
 
@@ -398,7 +398,7 @@ ggsave("Figure_revision/individualWTP.png", width = 16, height =9, dpi="print")
 ```
 </details>
 
-# Appendix B: Models separated by season
+# Appendix B: Models separated by Season
 
 Respondents were randomly assigned into either a winter or a summer scenario. The following output shows two mixed logit models in WTP space separated by winter and summer samples.
 
@@ -508,7 +508,19 @@ htmlreg(l = mixmodelsWTP_tex  ,
 
 # Appendix D: Latent Class Analysis
 
- Additionally to the mixed logit models, we estimate latent class models with two to six classes. 
+ In addition to the mixed logit models, we estimate latent class models with two to six classes. Latent class analyses can provide additional insights into the distribution of preferences by allocating respondents into different preference segments (classes). The following tables list the five estimated latent class models from two to six classes. A priori, the optimal number of classes is unknown. In our case, we present results from all five latent class models and discuss how they differ in terms of model fit, plausibility of results, and similarity to results from mixed and conditional logit models to determine a model we consider the best. 
+ 
+Both, the five-class and a six-class model have convergence issues and standard errors could not be calculated. Therefore, we do not consider these two models in the further analysis. 
+Regarding model fit, figure 7.1 shows BIC, AIC, and cAIC for the estimated latent class models. We observe a small improvement from a two-class model to a three-class model and a comparatively large improvement from the three-class model to the four-class model. We thus consider the four-class model as the best with respect to model fit. 
+
+Another criterion for a well-specified and robust model is the extent to which the mean WTP values over all classes correspond to the mean values of the mixed and conditional logit models we have estimated. Table 14.1 in Appendix I overviews the mean (and median in case of the mixed logit model with a log-normally distributed price coefficient) WTP of estimated models. The table reveals that the two-class model has mean WTP values most similar to all other models. Also, the four-class model has reasonable mean WTP values yet they are significantly higher than in the mixed logit models. The three-class model has highly diverging mean WTP values compared to all other models. Hence, we consider the two-class and the four-class models as best. 
+In both models and in all classes, all coefficients except the interaction coefficient with open source vs. commons are statistically significant. Both models indicate one class (34% in the two-class model, 19% in the four-class model) in which respondents are only willing to pay for tomatoes if the attributes take specific levels. More specifically, the WTP for a base version of the tomatoes (non-EU, not organic) is below zero and is only above zero if at least one of these attributes improves. Regarding the remaining shares, the four-class model differentiates further, while the two-class model summarizes the remaining heterogeneity in one class. This class (66%) has a comparatively high WTP for a base version (non-EU, non-organic, private ownership) of EUR 4.2. WTP for regional is EUR 2.3 and for Bioverita EUR 1.9. For open source/commons, it is EUR 0.4. The four-class model is more differentiated. Here, class 2 (15%) and class 3 (41%) have lower WTP values for the base level. The main difference between the classes is the WTP for the open source/commons attribute. While in class 2, WTP for this attribute is EUR 0.2, it is EUR 1.1 in class 3. This finding is especially relevant, as it indicates that there is a large share of respondents who do have a strong preference for open source/commons products, while others have no or weaker preferences. Finally, class 1 (25%) has a high WTP for the base product and a low yet positive WTP for the attributes. 
+
+In total, the four-class model provides relevant information regarding the distribution of preferences in the sample. Class 1 describes high WTP for tomatoes, with low WTP for the attributes. In class 4, the levels of the attributes are decisive for WTP for tomatoes, and classes 2 and 3 have both WTP for tomatoes and for the attributes, and, most strikingly, they differ in the WTP for ownership. We leave it to the reader to dive deeper into the latent class analysis, using the code we provide on GitHub.
+   
+  
+ 
+  
 <details>
   <summary>Appendix D: Latent Class Analysis</summary>
 
@@ -526,6 +538,7 @@ coef_names <- c("ASC", "EU Organic", "EU Organic + Bioverita", "Local", "Germany
 print(
 htmlreg(lcmodelsWTP_tex[[clno]] ,
        single.row = TRUE , custom.coef.names = coef_names, 
+       custom.model.names = paste0(modelnames, "<br>  (" , clshare , "\\%)") ,
       # custom.model.names = paste0("\\specialcell{",modelnames, "\\\\  (" , clshare , "\\%)}") ,
        caption = paste0("WTP values of latent class model with " ,nclasses, " classes" ),
        #groups = list("WTP"=1:6, "Membership" = 7:length(lcmodelsWTP_tex[["lc2cl"]][["Class2"]]@coef.names) )
@@ -534,7 +547,6 @@ htmlreg(lcmodelsWTP_tex[[clno]] ,
 }       
  
 
-#  custom.coef.names = rep(c("ASC", "MANUFEU" , "MANUFSWE", "CULTEU", "CULTSWE", "ECO") ,times=nclasses  ),    
 
 ```
 
@@ -542,7 +554,7 @@ htmlreg(lcmodelsWTP_tex[[clno]] ,
 source("scripts/compare_lcmodels_correct.R")
 ```
 
-```{r lc graph}
+```{r lc-graph, fig.cap = "Different Information Criteria for Latent Class Models"}
 gof_lc_graph
 ```
 
@@ -569,7 +581,7 @@ htmlreg(l = clmodelsWTP_tex ,
 ```
 </details>
 
-# Appendix F: Models used in paper
+# Appendix F: Models used in Paper
 
 The following chunks replicate the models used in the main text
 
@@ -641,7 +653,7 @@ htmlreg(l = c(intmodel_split[1], remGOF(intmodel_split[2:4])) ,  custom.model.na
 ```
 </details>
 
-# Appendix H: Z-Tests for differences in parameters between information splits
+# Appendix H: Z-Tests for Differences in Parameters between Information Splits
 
 We used z-tests to check for differences in information treatment models.
 
@@ -684,7 +696,7 @@ kable(ztest.pvals) %>% kable_styling()
 </details>
 
 
-# Appendix I: Model with familiarity interactions
+# Appendix I: Model with Familiarity Interactions
 
 As we expect that people who are familiar with the attributes are more likely to have a high WTP for these attributes, we estimate a model with interactions of the respective attribute and the stated familiarity question.
 
@@ -706,7 +718,7 @@ htmlreg(l = mixmodelsWTP_tex  , custom.coef.names = coef_names,
 
 </details>
 
-# Appendix J: Models in preference space 
+# Appendix J: Models in Preference Space 
 
 We also estimated mixed logit models in preference space. These models were also considered as the main models in the main text.
 
@@ -742,15 +754,15 @@ htmlreg(l = mixmodelsWTP_tex  ,
 </details>
 
 
-# Appendix I: Comparision of WTP across all models
+# Appendix K: Comparison of WTP across all Models
 
 <details>
-  <summary>Appendix I: Comparision of WTP across all models</summary>
+  <summary>Appendix K: Comparison of WTP across all models</summary>
 
-We provide a table that compares mean and median (in case of log-normal cost coeffient in preference space) WTP across all models.
+We provide a table that compares mean and median (in case of log-normal cost coefficient in preference space) WTP across all models.
 
-```{r table lc_pre_all}
-library(stringr)
+```{r}
+
 source("scripts/function_lc_avg.R")
 wtp <- list()
 for (z in 2:6) {
@@ -762,6 +774,14 @@ lc_av_wtp <- as.data.frame(wtp)
 colnames(lc_av_wtp) <- names(lcmodels)
 rownames(lc_av_wtp) <- c("ASC", "EU Organic", "EU Organic + Bioverita", "Local", "Germany", "Spain", "Ownership","Ownership x Open-source vs. commons", "Delta")
 lc_av_wtp <- lc_av_wtp[1:8, ]
+
+# add clogit
+
+clogit <- as.data.frame(models$clog_allsamples$estimate)
+clogit$Coefficient <- rownames(clogit)
+colnames(clogit) <- c("wtp", "Coefficient")
+clogit <- clogit %>% filter(Coefficient!="ascwinter"& Coefficient!="cost")
+
 
 #add pref space models 
 fx_wtp <-  as.data.frame(modelsWTP$mixlog_fix_price)
@@ -779,12 +799,141 @@ all_wtp <- all_wtp %>% filter(!grepl("^sd", Coefficient)) %>% filter(Coefficient
 
 lc_av_wtp$Fixed_Price <- fx_wtp$wtp
 lc_av_wtp$Log_normal_Price <- log_wtp$wtp
+lc_av_wtp$clogit <- clogit$wtp
 lc_av_wtp$Full_sample_Wtp <- all_wtp$wtp
 
-kable(lc_av_wtp, digits = 4, caption = "Overview of the WTP values for the different models") %>%
-  kable_styling(full_width = FALSE)
+
+
 
 
 ``` 
+
+
+
+```{r lc-pre-all}
+
+kable(lc_av_wtp, digits = 2, caption = "Overview of mean WTP values for the different models" ,
+        col.names = c(names(lc_av_wtp[1:5]), "Fixed Price", "Log Normal Price", "Conditional Logit" , "Model used in manuscript") ) %>%
+  kable_styling(full_width = FALSE) %>% 
+  add_header_above(c("","Latent class models"=5, "Preference Space models"=2, "WTP Space Models" =2)) %>% 
+  add_footnote("All values are mean values except for the mixed logit model with a log-normally distributed price coefficient, where we report the medians. For the latent class models, we use the weighted averages over all classes.", notation="symbol")
+
+
+```
+
   
 </details>
+
+
+# Appendix L: Socio-demographic Comparison of the Information Splits
+
+<details>
+  <summary>Appendix L: Socio-demographic comparison of the information splits</summary>
+  
+```{r}
+
+socio <- database2 %>% distinct(RID, .keep_all=TRUE) %>% 
+                       mutate(Age = q21 + 14 ,
+                              info_text =case_when(info_text ==1 ~ "No Text", 
+                                        info_text ==2 ~ "Environment", 
+                                        TRUE ~ "Industry")) %>%
+                       rename("HH_Size" = q24) %>% 
+                       select(Income, Female, Age, HigherEdu, HH_Size,info_text) 
+
+
+summary_socio <-socio %>%   group_by(info_text) %>% 
+  summarize(across(everything(), ~round(mean(.,rm.na=TRUE),2) ))
+
+#treatment_list <- map(set_names(treatment), ~ filter(socio, info_text == .x))
+
+kable(summary_socio,digits = 2, caption = "Overview of the main socio-demographic variables for the different            treatment groups" , col.names = c("Treatment Group", "Income", "Share of Females" , "Age", "Higher Education", "Household Size")) %>%
+       kable_styling(full_width = FALSE) %>% 
+       add_footnote("The table reports the means of the variables of the different information split samples. Income was defined as a categorical variable in the survey.", notation="symbol")
+
+
+
+```
+
+
+
+```{r sociotestcomp1}
+
+
+
+
+
+# compute statistical tests
+# 
+p_values <- c()
+p_values[1] <- kruskal.test(Income ~ info_text, data=socio)$p.value
+p_values[2] <-chisq.test(socio$Female, socio$info_text)$p.value
+p_values[3] <-rstatix::anova_test(Age~ info_text, data = socio)$p
+p_values[4] <-chisq.test(socio$HigherEdu, socio$info_text)$p.value
+p_values[5] <-rstatix::anova_test(HH_Size~ info_text, data= socio)$p
+# 
+ variables <- c( "Income", "Share of Females" , "Age", "Higher Education", "Household Size")
+ tests <- c("Kruskal-Wallis Test", "Chi-Squared Test", "One-way ANOVA Test", "Chi-Squared Test", "One-way ANOVA Test")
+# 
+ p_values <- bind_cols( variables,  tests, p_values)
+ colnames(p_values) <- c("Variable", "Test", "P-Value")
+# 
+# 
+ kable(p_values, digits=3, caption = "Results of the test for differences among the treatment groups") %>%  kable_styling(full_width = FALSE) %>% 
+    add_footnote("The null hypothesis of the tests is that there exist no differences in the means of the respective variables between the different groups.", notation="symbol")
+      
+
+```
+
+
+
+```{r sociocomp1}
+
+socio <- database2 %>% distinct(RID, .keep_all=TRUE) %>% 
+                       mutate(Age = q21 + 14 ,
+                              oc =case_when(oc ==0 ~ "Commons Framing", 
+                                        oc ==1 ~ "Open Source Framing")) %>%
+                       rename("HH_Size" = q24) %>% 
+                       select(Income, Female, Age, HigherEdu, HH_Size,oc) 
+
+
+summary_socio <-socio %>%   group_by(oc) %>% 
+  summarize(across(everything(), ~round(mean(.,rm.na=TRUE),2) ))
+
+#treatment_list <- map(set_names(treatment), ~ filter(socio, info_text == .x))
+
+kable(summary_socio,digits = 2, caption = "Overview of the main socio-demographic variables for the open source and commons split samples" , col.names = c("Treatment Group", "Income", "Share of Females" , "Age", "Higher Education", "Household Size")) %>%
+       kable_styling(full_width = FALSE) %>% 
+       add_footnote("The table reports the means of the variables of the open source and commons split samples. Income was defined as a categorical variable in the survey.", notation="symbol")
+
+```
+
+
+
+
+```{r sociocomptest1}
+
+
+# compute statistical tests
+# 
+p_values <- c()
+p_values[1] <- kruskal.test(Income ~ oc, data=socio)$p.value
+p_values[2] <-chisq.test(socio$Female, socio$oc)$p.value
+p_values[3] <-rstatix::anova_test(Age~ oc, data = socio)$p
+p_values[4] <-chisq.test(socio$HigherEdu, socio$oc)$p.value
+p_values[5] <-rstatix::anova_test(HH_Size~ oc, data= socio)$p
+# 
+ variables <- c( "Income", "Share of Females" , "Age", "Higher Education", "Household Size")
+ tests <- c("Kruskal-Wallis Test", "Chi-Squared Test", "One-way ANOVA Test", "Chi-Squared Test", "One-way ANOVA Test")
+# 
+ p_values <- bind_cols( variables,  tests, p_values)
+ colnames(p_values) <- c("Variable", "Test", "P-Value")
+# 
+# 
+ kable(p_values, digits=3, caption = "Results of the test for differences among open source and commons split samples") %>%  kable_styling(full_width = FALSE) %>% 
+    add_footnote("The null hypothesis of the tests is that there exist no differences in the means of the respective variables between the different groups.", notation="symbol")
+      
+
+
+
+```
+
